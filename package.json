@@ -1,0 +1,103 @@
+{
+  "name": "dsh-nekowhale-stickers",
+  "version": "1.0.0",
+  "description": "大肥鱼 / GPT娘 sticker knowledge, search and local meme templates for DeepSeek Harness (dsh) and any bot",
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./core": "./lib/core/index.js",
+    "./meme": "./lib/meme/index.js",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "nekowhale-stickers": "lib/cli.js"
+  },
+  "files": [
+    "lib/**/*.js",
+    "lib/**/*.d.ts",
+    "lib/**/*.json",
+    "meta/**",
+    "cordis.patch.yml",
+    "skills/**",
+    "NOTICE",
+    "LICENSE-ASSETS"
+  ],
+  "keywords": [
+    "dsh",
+    "deepseek",
+    "cordis",
+    "stickers",
+    "meme",
+    "表情包",
+    "大肥鱼"
+  ],
+  "license": "Apache-2.0 AND CC-BY-NC-4.0",
+  "author": "Loping151",
+  "homepage": "https://github.com/Loping151/dsh-nekowhale-stickers#readme",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-layout"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "tsc -p . && node -e \"const f=require('fs');f.copyFileSync('src/meme/banwords.json','lib/meme/banwords.json');f.copyFileSync('client/client.js','lib/client.js')\"",
+    "typecheck": "tsc -p . --noEmit",
+    "prepack": "pnpm run build"
+  },
+  "dependencies": {
+    "gifenc": "^1.0.3",
+    "gifuct-js": "^2.1.2"
+  },
+  "optionalDependencies": {
+    "@napi-rs/canvas": "^1.0.13"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.2",
+    "@deepseek-ai/dsh-home-paths": "^0.1.5-rc.1",
+    "@deepseek-ai/dsh-tools": "^0.1.5-rc.1",
+    "@deepseek-ai/schemastery": "^3.18.2"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/cordis": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-home-paths": {
+      "optional": true
+    },
+    "@deepseek-ai/dsh-tools": {
+      "optional": true
+    },
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.5",
+    "@deepseek-ai/dsh-home-paths": "^0.1.5-rc.2",
+    "@deepseek-ai/dsh-tools": "^0.1.5-rc.2",
+    "@deepseek-ai/schemastery": "^3.18.5",
+    "@types/node": "^20.19.43",
+    "typescript": "^7.0.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Loping151/dsh-nekowhale-stickers.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Loping151/dsh-nekowhale-stickers/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@12.4.2+sha512.08adc6613180275c7c9edada39dcf08c9c61ad4e7eaf330a4f3461f102b0f907423454d117f98e72d47fef0616070644d7bffc973a6a57f5090a6d7c368b07c9"
+}

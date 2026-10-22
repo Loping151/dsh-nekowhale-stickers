@@ -1,0 +1,7 @@
+# Bundle layer for dsh-nekowhale-stickers, applied when the package is listed in a profile's dsh.profile.bundles
+# (dsh plugin add does that). One host-plane row: tools and the skill land in the global layers, so every agent
+# preset sees them. Keep config out of this file: a user's row with the same id replaces the whole config
+# object, so defaults live in the schema.
+- insert:
+    - id: nekowhale-stickers
+      name: dsh-nekowhale-stickers

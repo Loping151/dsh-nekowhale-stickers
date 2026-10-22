@@ -1,0 +1,23 @@
+Knowledge data in this repository is licensed under the Creative Commons
+Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0).
+https://creativecommons.org/licenses/by-nc/4.0/
+Full legal code: https://creativecommons.org/licenses/by-nc/4.0/legalcode
+
+This covers:
+  meta/                   the sticker knowledge file (tags, descriptions, meme notes)
+  tools/annotate/data/    the annotation sources
+
+You may share and adapt them, but you must keep the original author's link and website
+(可以叫我云大人/雾雪, https://space.bilibili.com/103739, https://kiriyuki.com) and you may
+not charge for them or use them for other commercial purposes.
+
+Not part of this repository and not covered by any license here:
+  - The sticker GIFs, fetched from https://kiriyuki.com at runtime.
+  - The README images (hero, showcase, template examples, portraits, icon), hosted by
+    kiriyuki.com under https://kiriyuki.com/meme/kit/nekowhale/ .
+  - The web pet (Live2D model and runtime), provided by kiriyuki.com.
+These remain the property of their authors and may not be redistributed or used commercially.
+大肥鱼 design is based on ZipZipPipe (https://space.bilibili.com/4168597) and 上善无形
+(https://space.bilibili.com/4456176); GPT娘 design is based on ZipZipPipe.
+
+Source code is licensed separately under Apache-2.0 (see LICENSE and NOTICE).

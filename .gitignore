@@ -1,0 +1,13 @@
+node_modules/
+lib/
+dist/
+data/
+.cache/
+*.log
+# promo video workspace (local only)
+video/
+# machine-specific notes and private verification tools (kept locally)
+docs/cleanup.md
+tools/meme-compare/
+# images are hosted by kiriyuki.com under /meme/kit/nekowhale/ (see LICENSE-ASSETS)
+assets/
