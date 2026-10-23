@@ -108,11 +108,11 @@ The kiriyuki.com 大肥鱼 web pet appears in the corner of the dsh web UI. It r
 dsh plugin --profile web add dsh-nekowhale-stickers
 ```
 
-Then restart `dsh web`. A local `.tgz` from `pnpm pack` works too.
+Then restart `dsh web`. On dsh 0.2 you can also enter `dsh-nekowhale-stickers` under **Plugins → Add plugin** in the web sidebar. A local `.tgz` from `pnpm pack` works too.
 
 ## ⚙️ Configure
 
-Easiest: in the dsh web UI open **Settings → Plugins → 大肥鱼表情包**, change options and Save. They apply immediately, no restart.
+Easiest: in the dsh web UI sidebar open **Plugins → 大肥鱼表情包** (dsh 0.1.x: **Settings → Plugins → 大肥鱼表情包**), change options and Save. They apply immediately, no restart.
 
 Defaults can also go in the profile's `cordis.patch.yml`; values saved in the web UI override them:
 

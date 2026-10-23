@@ -41,45 +41,45 @@ export interface Config {
   routePath: string
 }
 
-export const Config: Schema<Config> = Schema.intersect([
-  Schema.object({
-    site: Schema.string().default(DEFAULT_SITE).description('Sticker site origin.'),
-    packs: Schema.array(String).default(DEFAULT_PACKS).description('Packs to serve (showcase names on the site).'),
-    dataDir: Schema.string().description('Writable data directory. Default: $DSH_HOME/nekowhale-stickers.'),
-    autoSync: Schema.union(['startup', 'lazy', 'off']).default('lazy')
-      .description('startup: mirror all GIFs in the background; lazy: download each GIF on first use; off: no network.'),
-    refreshHours: Schema.natural().default(6).description('How often to re-check the manifest, knowledge file and templates.'),
-    metaPath: Schema.string().default('meme/kit/nekowhale.json').description('Site path of the hosted knowledge file. Empty: bundled copy only.'),
-  }).description('Source'),
-  Schema.object({
-    blacklist: Schema.array(String).default([]).description('Always hide. Rules: id, file stem, code, name, or pack:/tag:/emotion:/group: prefixed, e.g. tag:舌吻.'),
-    whitelist: Schema.array(String).default([]).description('If not empty, only stickers matching a rule exist.'),
-    agentCuration: Schema.boolean().default(true).description('Let the agent browse and switch stickers on or off for itself (sticker_manage).'),
-  }).description('Selection'),
-  Schema.object({
-    persona: Schema.union(['self', 'neutral']).default('self')
-      .description('self: the agent is 大肥鱼 (DeepSeek as a girl) and the stickers are its own expressions; neutral: a third-party sticker pack, for non-DeepSeek models.'),
-    promptMode: Schema.union(['skill', 'hint', 'index', 'off']).default('skill')
-      .description('skill: only the skill catalog line (~60 tokens); hint: plus a one-line system hint; index: plus a compact list of enabled stickers; off: tools only.'),
-    frequency: Schema.union(['rare', 'normal', 'often']).default('normal').description('How eagerly the hint asks the agent to use stickers.'),
-    indexLimit: Schema.natural().default(40).description('index mode: at most this many stickers are listed (pick favourites with sticker_manage first).'),
-    searchLimit: Schema.natural().min(1).max(20).default(5).description('Default search results.'),
-    returnImageToModel: Schema.boolean().default(false).description('Attach the picture to tool results so the model can see it (costs image tokens).'),
-  }).description('Prompt and tokens'),
-  Schema.object({
-    templates: Schema.boolean().default(true).description('Enable meme_render (text / avatar templates, rendered locally).'),
-    banwords: Schema.boolean().default(true).description('Mask banned words in rendered memes, like the website does.'),
-  }).description('Templates'),
-  Schema.object({
-    pet: Schema.boolean().default(true).description('Show the kiriyuki.com web pet (大肥鱼) floating in the web UI. Turning it off hides it within seconds.'),
-    petHeight: Schema.natural().min(120).max(480).default(211).description('Pet height in CSS pixels.'),
-    petBubbles: Schema.boolean().default(true).description('Speech bubbles (about 1.5 MB more to load).'),
-  }).description('Web pet'),
-  Schema.object({
-    publicBaseUrl: Schema.string().description('Origin used in image links, e.g. http://127.0.0.1:3180. Default: the dsh web server.'),
-    routePath: Schema.string().default('/x-nekowhale-stickers').description('HTTP route that serves images to the web UI.'),
-  }).description('Web UI'),
-]) as Schema<Config>
+// dsh 0.2 edits a plugin's `.volatile()` fields on its Plugins page and hands them over as references that it
+// updates in place; dsh 0.1.5 (whose schemastery may predate volatile) passes plain values.
+const live = <S,>(s: S): S => (typeof (s as any).volatile === 'function' ? (s as any).volatile() : s)
+const plain = (v: unknown): unknown => (v !== null && typeof v === 'object' && typeof (v as any).get === 'function' ? (v as any).get() : v)
+
+// One flat object: dsh 0.2 only edits volatile fields on a fixed object path (not inside an intersect).
+export const Config: Schema<Config> = Schema.object({
+  // Source
+  site: Schema.string().default(DEFAULT_SITE).description('Sticker site origin.'),
+  packs: Schema.array(String).default(DEFAULT_PACKS).description('Packs to serve (showcase names on the site).'),
+  dataDir: Schema.string().description('Writable data directory. Default: $DSH_HOME/nekowhale-stickers.'),
+  autoSync: Schema.union(['startup', 'lazy', 'off']).default('lazy')
+    .description('startup: mirror all GIFs in the background; lazy: download each GIF on first use; off: no network.'),
+  refreshHours: Schema.natural().default(6).description('How often to re-check the manifest, knowledge file and templates.'),
+  metaPath: Schema.string().default('meme/kit/nekowhale.json').description('Site path of the hosted knowledge file. Empty: bundled copy only.'),
+  // Selection
+  blacklist: live(Schema.array(String).default([]).description('Always hide. Rules: id, file stem, code, name, or pack:/tag:/emotion:/group: prefixed, e.g. tag:舌吻.')),
+  whitelist: live(Schema.array(String).default([]).description('If not empty, only stickers matching a rule exist.')),
+  agentCuration: live(Schema.boolean().default(true).description('Let the agent browse and switch stickers on or off for itself (sticker_manage).')),
+  // Prompt and tokens
+  persona: live(Schema.union(['self', 'neutral']).default('self')
+    .description('self: the agent is 大肥鱼 (DeepSeek as a girl) and the stickers are its own expressions; neutral: a third-party sticker pack, for non-DeepSeek models.')),
+  promptMode: live(Schema.union(['skill', 'hint', 'index', 'off']).default('skill')
+    .description('skill: only the skill catalog line (~60 tokens); hint: plus a one-line system hint; index: plus a compact list of enabled stickers; off: tools only.')),
+  frequency: live(Schema.union(['rare', 'normal', 'often']).default('normal').description('How eagerly the hint asks the agent to use stickers.')),
+  indexLimit: live(Schema.natural().default(40).description('index mode: at most this many stickers are listed (pick favourites with sticker_manage first).')),
+  searchLimit: live(Schema.natural().min(1).max(20).default(5).description('Default search results.')),
+  returnImageToModel: live(Schema.boolean().default(false).description('Attach the picture to tool results so the model can see it (costs image tokens).')),
+  // Templates
+  templates: live(Schema.boolean().default(true).description('Enable meme_render (text / avatar templates, rendered locally).')),
+  banwords: live(Schema.boolean().default(true).description('Mask banned words in rendered memes, like the website does.')),
+  // Web pet
+  pet: live(Schema.boolean().default(true).description('Show the kiriyuki.com web pet (大肥鱼) floating in the web UI. Turning it off hides it within seconds.')),
+  petHeight: live(Schema.natural().min(120).max(480).default(211).description('Pet height in CSS pixels.')),
+  petBubbles: live(Schema.boolean().default(true).description('Speech bubbles (about 1.5 MB more to load).')),
+  // Web UI
+  publicBaseUrl: Schema.string().description('Origin used in image links, e.g. http://127.0.0.1:3180. Default: the dsh web server.'),
+  routePath: Schema.string().default('/x-nekowhale-stickers').description('HTTP route that serves images to the web UI.'),
+}) as Schema<Config>
 
 // What the web UI settings page edits (dsh: Settings → Plugins). dsh stores the user's values in
 // $DSH_HOME/settings.yaml on top of the cordis.patch.yml config, and pushes changes live.
@@ -169,11 +169,13 @@ export function apply(ctx: any, config: Config) {
   // Current options: cordis.patch.yml config, overridden by the web UI settings once dsh hands them over.
   // Read on use, never copied, so changes apply live.
   let source: () => Partial<Live> = () => ({})
-  const cur = (): Config => ({ ...config, ...source() })
+  const opts = () => Object.fromEntries(Object.entries(config).map(([k, v]) => [k, plain(v)])) as unknown as Config
+  const cur = (): Config => ({ ...opts(), ...source() })
+  const start = cur()
   const kit = new StickerKit({
     site: config.site, packs: config.packs, dataDir: config.dataDir ?? dshHomePath('nekowhale-stickers'),
     bundledMeta: BUNDLED_META, metaPath: config.metaPath, autoSync: config.autoSync, refreshHours: config.refreshHours,
-    blacklist: config.blacklist, whitelist: config.whitelist, banwords: config.banwords,
+    blacklist: start.blacklist, whitelist: start.whitelist, banwords: start.banwords,
     log: (m, level) => (level === 'warn' ? log.warn(m) : log.info(m)),
   })
   ctx.provide('stickers', kit)
@@ -352,19 +354,38 @@ export function apply(ctx: any, config: Config) {
   }
   remountAgent()
 
+  const liveKey = () => { const c = cur(); return JSON.stringify(LIVE_KEYS.map((k) => c[k])) }
+  let applied = liveKey()
   const applySettings = () => {
+    applied = liveKey()
     const c = cur()
     kit.configure({ blacklist: c.blacklist, whitelist: c.whitelist, banwords: c.banwords })
     remountAgent()
   }
   ctx.inject(['settings'], (sctx: any) => {
-    // dsh 0.1.5 settings store; absent (or reshaped) on 0.2.x, where config fields are edited instead.
-    if (typeof sctx.settings?.installSection !== 'function') return
-    const base = Object.fromEntries(LIVE_KEYS.map((k) => [k, config[k]])) as Live
-    sctx.settings.installSection(ctx, 'nekowhale-stickers', Settings, base, {
-      setSource: (current: () => Partial<Live>) => { source = current },
-      onChange: () => { try { applySettings() } catch (e) { log.warn('settings: %s', e) } },
-    })
+    // dsh 0.1.5 settings store.
+    if (typeof sctx.settings?.installSection === 'function') {
+      const base = Object.fromEntries(LIVE_KEYS.map((k) => [k, opts()[k]])) as Live
+      sctx.settings.installSection(ctx, 'nekowhale-stickers', Settings, base, {
+        setSource: (current: () => Partial<Live>) => { source = current },
+        onChange: () => { try { applySettings() } catch (e) { log.warn('settings: %s', e) } },
+      })
+      return
+    }
+    // dsh 0.2: the Plugins page edits the volatile Config fields; the browser half draws its own form there.
+    if (typeof sctx.settings?.configure === 'function') sctx.effect(() => sctx.settings.configure({ auto: false }, ctx.fiber))
+  })
+  // dsh 0.2 updates the volatile references in place without telling the plugin: look again after each
+  // profile reload (a Plugins-page save is one) and, as a fallback, every few seconds.
+  const recheck = () => {
+    if (liveKey() === applied) return
+    try { applySettings() } catch (e) { log.warn('settings: %s', e) }
+  }
+  ctx.on('app-boot/config-reload', recheck)
+  ctx.effect(() => {
+    const timer = setInterval(recheck, 2000)
+    timer.unref?.()
+    return () => clearInterval(timer)
   })
 
   // ---------------------------------------------------------------- skill (body loads on demand)

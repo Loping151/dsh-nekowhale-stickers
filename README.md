@@ -108,11 +108,11 @@ dsh 网页界面右下角会出现 kiriyuki.com 的 大肥鱼网页桌宠。桌�
 dsh plugin --profile web add dsh-nekowhale-stickers
 ```
 
-重启 `dsh web` 即可。也可以安装本地打包的 `.tgz`（`pnpm pack`）。
+重启 `dsh web` 即可。dsh 0.2 也可以在网页侧栏 **插件 → 添加插件** 里填 `dsh-nekowhale-stickers`。也可以安装本地打包的 `.tgz`（`pnpm pack`）。
 
 ## ⚙️ 配置
 
-最简单的方式：dsh 网页里打开 **设置 → 插件 → 大肥鱼表情包**，改完点保存，立即生效、无需重启。
+最简单的方式：dsh 网页侧栏打开 **插件 → 大肥鱼表情包**（dsh 0.1.x 在 **设置 → 插件 → 大肥鱼表情包**），改完点保存，立即生效、无需重启。
 
 也可以在 profile 的 `cordis.patch.yml` 里写默认值，网页里的设置会覆盖它：
 

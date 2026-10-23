@@ -1,6 +1,6 @@
 {
   "name": "dsh-nekowhale-stickers",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "大肥鱼 / GPT娘 sticker knowledge, search and local meme templates for DeepSeek Harness (dsh) and any bot",
   "type": "module",
   "main": "lib/index.js",
@@ -10,7 +10,8 @@
     "./client": "./lib/client.js",
     "./core": "./lib/core/index.js",
     "./meme": "./lib/meme/index.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./locale/*.json": "./locale/*.json"
   },
   "bin": {
     "nekowhale-stickers": "lib/cli.js"
@@ -23,7 +24,9 @@
     "cordis.patch.yml",
     "skills/**",
     "NOTICE",
-    "LICENSE-ASSETS"
+    "LICENSE-ASSETS",
+    "locale/*.json",
+    "icon.webp"
   ],
   "keywords": [
     "dsh",
@@ -100,5 +103,6 @@
     "node": ">=20",
     "dsh": ">=0.1.5-rc.1"
   },
-  "packageManager": "pnpm@12.4.2+sha512.08adc6613180275c7c9edada39dcf08c9c61ad4e7eaf330a4f3461f102b0f907423454d117f98e72d47fef0616070644d7bffc973a6a57f5090a6d7c368b07c9"
+  "packageManager": "pnpm@12.4.2+sha512.08adc6613180275c7c9edada39dcf08c9c61ad4e7eaf330a4f3461f102b0f907423454d117f98e72d47fef0616070644d7bffc973a6a57f5090a6d7c368b07c9",
+  "icon": "./icon.webp"
 }

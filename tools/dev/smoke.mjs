@@ -14,6 +14,7 @@ const ctx = {
   get: () => undefined,
   inject: (names, cb) => { injects.push(names.join(',')); if (names[0] === 'systemPrompt') cb({ effect: (f) => f(), systemPrompt: { section: (s) => sections.push(s) } }) },
   effect: (fn) => fn(),
+  on: () => () => {},
   plugin: (p) => { p.apply(ctx); return { dispose: async () => {} } },
 }
 plugin.apply(ctx, config)

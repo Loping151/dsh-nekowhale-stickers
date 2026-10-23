@@ -15,6 +15,7 @@ Not part of this repository and not covered by any license here:
   - The sticker GIFs, fetched from https://kiriyuki.com at runtime.
   - The README images (hero, showcase, template examples, portraits, icon), hosted by
     kiriyuki.com under https://kiriyuki.com/meme/kit/nekowhale/ .
+  - icon.webp, a small copy of that icon shipped so dsh can show it on its Plugins page.
   - The web pet (Live2D model and runtime), provided by kiriyuki.com.
 These remain the property of their authors. They may be shared non-commercially as long as the
 original author's link and website are kept; no paid or other commercial use.

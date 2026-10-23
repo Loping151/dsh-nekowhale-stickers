@@ -195,19 +195,36 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
   // A schema-driven form over dsh's own settings channel (settingsScope: session-authenticated, validated,
   // pushed live). The plugin applies saved values immediately.
   const NS = 'nekowhale-stickers'
+  const PKG = 'dsh-nekowhale-stickers'
   const OPTION_LABELS = {
     self: '我就是大肥鱼（适合 DeepSeek）', neutral: '第三方表情包',
     skill: '只挂 skill 目录（约 60 token）', hint: '再加一句提示', index: '提示 + 已启用表情清单', off: '关闭',
     rare: '偶尔', normal: '适中', often: '经常',
   }
-  function fieldsOf(node, out, group) {
+  // dsh 0.2 serves the Config schema itself (English descriptions); show the same Chinese labels as 0.1.5.
+  const FIELD_LABELS = {
+    pet: '在网页界面显示大肥鱼桌宠', petHeight: '桌宠大小（高度，像素）', petBubbles: '桌宠对话气泡',
+    persona: '模型身份', promptMode: '常驻提示', frequency: '发表情的频率（提示模式为 hint / index 时生效）',
+    indexLimit: 'index 模式最多列出的表情数', searchLimit: '每次搜索返回的条数',
+    returnImageToModel: '把图片附给模型看（消耗图像 token）', agentCuration: '允许 agent 自己挑选、开关表情',
+    templates: '启用模板制图（想 / 举牌 / 葱卷 / 对联 / 抱）', banwords: '模板文字自动屏蔽敏感词',
+    blacklist: '黑名单：一行一条，名字、编号或 tag: / pack: / emotion: 前缀', whitelist: '白名单：非空时只使用匹配的表情',
+  }
+  // Same groups and order as the 0.1.5 settings section; dsh 0.2 hands over one flat object.
+  const GROUPS = [
+    ['网页桌宠', ['pet', 'petHeight', 'petBubbles']],
+    ['角色与提示', ['persona', 'promptMode', 'frequency', 'indexLimit']],
+    ['表情', ['searchLimit', 'returnImageToModel', 'agentCuration', 'templates', 'banwords', 'blacklist', 'whitelist']],
+  ]
+  const ORDER = GROUPS.flatMap(([g, keys]) => keys.map((key) => [key, g]))
+  function fieldsOf(node, out) {
     out = out || []
     if (!node) return out
-    if (node.type === 'intersect') { for (const n of node.list) fieldsOf(n, out, group); return out }
-    if (node.type === 'object') {
-      const g = (node.meta && node.meta.description) || group || ''
-      for (const key of Object.keys(node.dict || {})) out.push({ key, node: node.dict[key], group: g })
-    }
+    if (node.type === 'intersect') { for (const n of node.list) fieldsOf(n, out); return out }
+    if (node.type === 'object') for (const key of Object.keys(node.dict || {})) out.push({ key, node: node.dict[key] })
+    const rank = (key) => { const i = ORDER.findIndex(([k]) => k === key); return i < 0 ? ORDER.length : i }
+    out.sort((a, b) => rank(a.key) - rank(b.key))
+    for (const f of out) { const hit = ORDER.find(([k]) => k === f.key); f.group = hit ? hit[1] : '其他' }
     return out
   }
   function kindOf(n) {
@@ -242,7 +259,7 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
     else if (kind === 'lines') input = h('textarea', { id, rows: 3, value: (value || []).join('\n'), disabled, style: S.input, onChange: (e) => onEdit(e.target.value.split('\n').map((x) => x.trim()).filter(Boolean)) })
     else input = h('input', { id, type: 'text', value: value == null ? '' : value, disabled, style: S.input, onChange: (e) => onEdit(e.target.value) })
     return h('div', { style: S.row },
-      h('label', { htmlFor: id, style: S.label }, (n.meta && n.meta.description) || field.key, h('span', { style: S.key }, field.key)),
+      h('label', { htmlFor: id, style: S.label }, FIELD_LABELS[field.key] || (n.meta && n.meta.description) || field.key, h('span', { style: S.key }, field.key)),
       input,
       overridden ? h('button', { type: 'button', onClick: onReset, disabled, style: S.btn, title: '撤销修改，恢复默认值' }, '恢复默认') : h('span'))
   }
@@ -263,7 +280,10 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
     const save = () => {
       const ops = Object.entries(draft).map(([k, v]) => (v === undefined ? { op: 'unset', path: [k] } : { op: 'set', path: [k], value: v }))
       setStatus('保存中…')
-      props.mutate(ops, snap.revision).then(() => { setDraft({}); setStatus('已保存，立即生效') }, (e) => setStatus(`保存失败：${e && e.message}`))
+      props.mutate(ops, snap.revision).then((ok) => {
+        if (ok === false) { setStatus('保存被拒绝，请检查取值后重试'); return }
+        setDraft({}); setStatus('已保存，立即生效')
+      }, (e) => setStatus(`保存失败：${e && e.message}`))
     }
     let lastGroup = null
     const rows = []
@@ -274,10 +294,10 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
         value: f.key in draft ? draft[f.key] : value[f.key],
         overridden: Object.prototype.hasOwnProperty.call(user, f.key),
         onEdit: (v) => setDraft((d) => ({ ...d, [f.key]: v })),
-        onReset: () => { setStatus('恢复默认…'); props.unset(f.key).then(() => setStatus(`${f.key} 已恢复默认`), (e) => setStatus(`失败：${e && e.message}`)) },
+        onReset: () => { setStatus('恢复默认…'); props.unset(f.key).then((ok) => setStatus(ok === false ? `${f.key} 恢复默认被拒绝` : `${f.key} 已恢复默认`), (e) => setStatus(`失败：${e && e.message}`)) },
       }))
     }
-    return h('div', { 'data-nekowhale-settings': '' },
+    return h('div', { 'data-nekowhale-settings': '', style: { fontSize: 13, lineHeight: 1.45 } },
       rows,
       h('div', { style: { display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' } },
         h('button', { type: 'button', disabled: !dirty || disabled, onClick: save, style: S.btn }, '保存'),
@@ -322,6 +342,28 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
             { name: 'settings.plugins.tab', id: 'nekowhale-stickers', order: 50, label: '大肥鱼表情包', inject: () => face }, Tab))
         } catch (e) {
           try { console.warn('[nekowhale-stickers] settings card disabled:', e) } catch {}
+        }
+      })
+    } catch {}
+    // dsh 0.2: settingsScope is gone; plugin config lives on the Plugins page (this bundle's detail page),
+    // read and written through configForms. Same form, same namespace.
+    try {
+      ctx.inject(['configForms', 'settingsSchema'], (sctx) => {
+        try {
+          const form = sctx.configForms.get(NS)
+          const mirror = sctx.configForms.describe()
+          void Promise.resolve(mirror.ensure && mirror.ensure()).catch(() => {})
+          const face = {
+            hooks: { scope: form, describe: mirror },
+            mutate: (ops, rev) => form.mutate(ops, rev),
+            unset: (k) => form.unset(k),
+            rehydrate: (json) => sctx.settingsSchema.rehydrate(json),
+          }
+          sctx.slots.inject('plugins.bundle.config', () => sctx.slots.register(
+            { name: 'plugins.bundle.config', key: PKG, inject: () => face },
+            (props) => (props.view === 'page' ? h(SettingsForm, props) : null)))
+        } catch (e) {
+          try { console.warn('[nekowhale-stickers] plugin page config disabled:', e) } catch {}
         }
       })
     } catch {}
