@@ -239,7 +239,7 @@ export function apply(ctx: any, config: Config) {
         if (!kit.isEnabled(s)) throw new Error(`sticker "${s.stem}" is switched off`)
         const { path } = await kit.file(s)
         const image = await tryImageForModel(path)
-        return { text: `${link(s.name, `/s/${s.hash}.gif`, path)}\n${footer}`, ...(image ? { image } : {}) }
+        return { text: `${link(s.name || s.stem, `/s/${s.hash}.gif`, path)}\n${footer}`, ...(image ? { image } : {}) }
       },
     }))
 

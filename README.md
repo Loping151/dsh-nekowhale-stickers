@@ -10,7 +10,7 @@
 <p>
 <img alt="dsh plugin" src="https://img.shields.io/badge/dsh-plugin-4D6BFE?style=flat-square">
 <img alt="MCP" src="https://img.shields.io/badge/MCP-server-111827?style=flat-square">
-<img alt="stickers" src="https://img.shields.io/badge/stickers-320-5B8DEF?style=flat-square">
+<img alt="stickers" src="https://img.shields.io/badge/stickers-322-5B8DEF?style=flat-square">
 <img alt="templates" src="https://img.shields.io/badge/templates-6-7C9CF5?style=flat-square">
 <img alt="version" src="https://img.shields.io/badge/version-1.0.0-blue?style=flat-square">
 <img alt="node" src="https://img.shields.io/badge/node-%E2%89%A520-339933?style=flat-square&logo=node.js&logoColor=white">
