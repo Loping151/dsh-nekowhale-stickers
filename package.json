@@ -1,6 +1,6 @@
 {
   "name": "dsh-nekowhale-stickers",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "大肥鱼 / GPT娘 sticker knowledge, search and local meme templates for DeepSeek Harness (dsh) and any bot",
   "type": "module",
   "main": "lib/index.js",
@@ -62,10 +62,10 @@
     "@napi-rs/canvas": "^1.0.13"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-home-paths": "^0.1.5-rc.1",
-    "@deepseek-ai/dsh-tools": "^0.1.5-rc.1",
-    "@deepseek-ai/schemastery": "^3.18.2"
+    "@deepseek-ai/cordis": ">=4.0.2",
+    "@deepseek-ai/dsh-home-paths": ">=0.1.5-rc.1",
+    "@deepseek-ai/dsh-tools": ">=0.1.5-rc.1",
+    "@deepseek-ai/schemastery": ">=3.18.2"
   },
   "peerDependenciesMeta": {
     "@deepseek-ai/cordis": {
@@ -83,8 +83,8 @@
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.5",
-    "@deepseek-ai/dsh-home-paths": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-tools": "^0.1.5-rc.2",
+    "@deepseek-ai/dsh-home-paths": "0.2.1-rc.2",
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.2",
     "@deepseek-ai/schemastery": "^3.18.5",
     "@types/node": "^20.19.43",
     "typescript": "^7.0.2"
@@ -97,7 +97,8 @@
     "url": "https://github.com/Loping151/dsh-nekowhale-stickers/issues"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20",
+    "dsh": ">=0.1.5-rc.1"
   },
   "packageManager": "pnpm@12.4.2+sha512.08adc6613180275c7c9edada39dcf08c9c61ad4e7eaf330a4f3461f102b0f907423454d117f98e72d47fef0616070644d7bffc973a6a57f5090a6d7c368b07c9"
 }
