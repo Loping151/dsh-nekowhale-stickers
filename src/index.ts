@@ -1,12 +1,14 @@
 // dsh (DeepSeek Harness) plugin: a thin cordis adapter over the framework-neutral StickerKit.
 // Named exports only. Do not add `export default`: the dsh loader prefers it and drops inject / Config.
-import { createReadStream } from 'node:fs'
+import { createReadStream, readFileSync } from 'node:fs'
 import { readFile, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import Schema from '@deepseek-ai/schemastery'
 import { defineTool } from '@deepseek-ai/dsh-tools'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { StickerKit, DEFAULT_PACKS, DEFAULT_SITE, loadImageInput } from './core/index.js'
+import { queryBalance } from './balance.js'
+import type { BalanceView } from './balance.js'
 import type { Sticker } from './core/index.js'
 
 export * from './core/index.js'
@@ -37,6 +39,7 @@ export interface Config {
   pet: boolean
   petHeight: number
   petBubbles: boolean
+  petBalance: boolean
   publicBaseUrl?: string
   routePath: string
 }
@@ -76,6 +79,7 @@ export const Config: Schema<Config> = Schema.object({
   pet: live(Schema.boolean().default(true).description('Show the kiriyuki.com web pet (大肥鱼) floating in the web UI. Turning it off hides it within seconds.')),
   petHeight: live(Schema.natural().min(120).max(480).default(211).description('Pet height in CSS pixels.')),
   petBubbles: live(Schema.boolean().default(true).description('Speech bubbles (about 1.5 MB more to load).')),
+  petBalance: live(Schema.boolean().default(true).description('Double-click the pet to show your DeepSeek balance (from dsh\'s DeepSeek sign-in or API key; asked of deepseek.com only, on the double-click).')),
   // Web UI
   publicBaseUrl: Schema.string().description('Origin used in image links, e.g. http://127.0.0.1:3180. Default: the dsh web server.'),
   routePath: Schema.string().default('/x-nekowhale-stickers').description('HTTP route that serves images to the web UI.'),
@@ -83,7 +87,7 @@ export const Config: Schema<Config> = Schema.object({
 
 // What the web UI settings page edits (dsh: Settings → Plugins). dsh stores the user's values in
 // $DSH_HOME/settings.yaml on top of the cordis.patch.yml config, and pushes changes live.
-const LIVE_KEYS = ['pet', 'petHeight', 'petBubbles', 'persona', 'promptMode', 'frequency', 'indexLimit',
+const LIVE_KEYS = ['pet', 'petHeight', 'petBubbles', 'petBalance', 'persona', 'promptMode', 'frequency', 'indexLimit',
   'searchLimit', 'returnImageToModel', 'agentCuration', 'templates', 'banwords', 'blacklist', 'whitelist'] as const
 type Live = Pick<Config, typeof LIVE_KEYS[number]>
 
@@ -92,6 +96,7 @@ export const Settings = Schema.intersect([
     pet: Schema.boolean().default(true).description('在网页界面显示大肥鱼桌宠'),
     petHeight: Schema.natural().min(120).max(480).default(211).description('桌宠大小（高度，像素）'),
     petBubbles: Schema.boolean().default(true).description('桌宠对话气泡'),
+    petBalance: Schema.boolean().default(true).description('双击桌宠查 DeepSeek 余额'),
   }).description('网页桌宠'),
   Schema.object({
     persona: Schema.union(['self', 'neutral']).default('self').description('模型身份'),
@@ -116,6 +121,14 @@ const PET_CHARACTER = 'dafeiyu'
 const SKILL_DIR = fileURLToPath(new URL('../skills/nekowhale-stickers/', import.meta.url))
 const SKILL_FILE = fileURLToPath(new URL('../skills/nekowhale-stickers/SKILL.md', import.meta.url))
 const BUNDLED_META = fileURLToPath(new URL('../meta/nekowhale.json', import.meta.url))
+const VERSION: string = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
+// The balance card's artwork and font, the same files the kiriyuki.com desktop pet uses.
+const PET_UI_DIR = fileURLToPath(new URL('../client/ui/', import.meta.url))
+const PET_UI: Record<string, string> = {
+  'balance/panel.png': 'image/png',
+  'balance/parts.png': 'image/png',
+  'font/zcool-kuaile-balance.woff2': 'font/woff2',
+}
 
 const TEXT_OUT = {
   schema: { type: 'object', additionalProperties: true, properties: { text: { type: 'string', required: true } } },
@@ -415,8 +428,27 @@ export function apply(ctx: any, config: Config) {
     const c = cur()
     return {
       pet: c.pet, base: `${config.site.replace(/\/+$/u, '')}/hakimi-pet`, character: PET_CHARACTER,
-      height: c.petHeight, bubbles: c.petBubbles,
+      height: c.petHeight, bubbles: c.petBubbles, balance: c.petBalance, local: `${config.routePath}/pet`,
     }
+  }
+
+  // Balance for the double-click card. Answers only a page on this machine (loopback peer and Host, so a
+  // DNS-rebound page cannot read it either); one query at a time, and a fresh answer is reused for a few seconds.
+  const loopback = (a: string) => /^127\./u.test(a) || a === '::1' || /^::ffff:127\./iu.test(a)
+  const hostName = (h: string) => h.replace(/:\d+$/u, '').replace(/^\[(.*)\]$/u, '$1').toLowerCase()
+  const local = (req: any) => {
+    const host = hostName(String(req.headers?.host ?? ''))
+    return loopback(String(req.socket?.remoteAddress ?? '')) && (host === 'localhost' || loopback(host))
+  }
+  let balanceAsk: Promise<BalanceView> | null = null
+  let balanceLast: { at: number; view: BalanceView } | null = null
+  const balance = (lang: string, tz: number): Promise<BalanceView> => {
+    if (balanceLast && Date.now() - balanceLast.at < 3000) return Promise.resolve(balanceLast.view)
+    balanceAsk ??= queryBalance(ctx, { version: VERSION, locale: lang, timezoneOffsetSeconds: tz }, (m) => log.info(m))
+      .catch((e): BalanceView => { log.warn('balance: %s', e); return { kind: 'failed' } })
+      .then((view) => { balanceLast = { at: Date.now(), view }; return view })
+      .finally(() => { balanceAsk = null })
+    return balanceAsk
   }
 
   ctx.inject(['webServer'], (wctx: any) => {
@@ -435,6 +467,35 @@ export function apply(ctx: any, config: Config) {
           res.setHeader('Content-Type', 'application/json; charset=utf-8')
           res.setHeader('Cache-Control', 'no-store')
           res.end(req.method === 'HEAD' ? undefined : body)
+          return
+        }
+        if (rest === '/pet/balance.json') {
+          res.setHeader('Content-Type', 'application/json; charset=utf-8')
+          res.setHeader('Cache-Control', 'no-store')
+          if (!cur().petBalance) { res.statusCode = 404; res.end(); return }
+          if (!local(req)) { res.statusCode = 403; res.end(JSON.stringify({ kind: 'local-only' })); return }
+          const q = new URL(req.url ?? '/', 'http://x').searchParams
+          const lang = /^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,3}$/u.test(q.get('lang') ?? '') ? q.get('lang')! : 'en'
+          const tz = Number(q.get('tz'))
+          const view = await balance(lang, Number.isInteger(tz) && Math.abs(tz) <= 14 * 3600 ? tz : 0)
+          res.end(req.method === 'HEAD' ? undefined : JSON.stringify(view))
+          return
+        }
+        const ui = rest.startsWith('/pet/ui/') ? rest.slice('/pet/ui/'.length) : ''
+        if (Object.hasOwn(PET_UI, ui)) {
+          try {
+            const file = PET_UI_DIR + ui
+            const info = await stat(file)
+            res.setHeader('Content-Type', PET_UI[ui])
+            res.setHeader('Content-Length', String(info.size))
+            res.setHeader('Cache-Control', 'public, max-age=86400')
+            res.setHeader('X-Content-Type-Options', 'nosniff')
+            if (req.method === 'HEAD') { res.end(); return }
+            createReadStream(file).on('error', () => res.destroy()).pipe(res)
+          } catch {
+            res.statusCode = 404
+            res.end()
+          }
           return
         }
         const m = /^\/(s|r)\/([0-9a-f]{12,16})\.gif$/u.exec(rest)

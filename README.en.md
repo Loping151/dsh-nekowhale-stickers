@@ -72,7 +72,8 @@ A cordis service <code>stickers</code>, <code>[sticker:name]</code> reply marks,
 <tr>
 <td colspan="3" valign="top">
 <h4>🐋 Web pet</h4>
-The kiriyuki.com 大肥鱼 web pet appears in the corner of the dsh web UI. It runs in a separate cross-origin iframe and never touches dsh sessions; <code>pet: false</code> turns it off.
+The kiriyuki.com 大肥鱼 web pet appears in the corner of the dsh web UI. It runs in a separate cross-origin iframe and never touches dsh sessions; <code>pet: false</code> turns it off.<br>
+<b>Double-click the pet for your DeepSeek balance</b>, read with the DeepSeek account signed in to dsh or the API key set there (the account first when both exist). Only on a double-click, dsh on this machine asks deepseek.com; the key and sign-in go nowhere else, and only pages on this machine get the answer. <code>petBalance: false</code> turns it off.
 </td>
 </tr>
 </table>
@@ -135,6 +136,7 @@ Defaults can also go in the profile's `cordis.patch.yml`; values saved in the we
 | `returnImageToModel` | `false` | attach the picture for the model to see (image tokens) |
 | `pet` | `true` | show the 大肥鱼 web pet in the web UI; `false` turns it off |
 | `petHeight` / `petBubbles` | `211` / `true` | pet size (height in pixels), speech bubbles (off saves about 1.5 MB) |
+| `petBalance` | `true` | double-click the pet to show your DeepSeek balance; `false` turns it off |
 
 ## 🧰 Tools
 

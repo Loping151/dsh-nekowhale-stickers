@@ -1,9 +1,12 @@
 // Minimal MCP server over stdio (newline-delimited JSON-RPC), no SDK dependency.
 // Any MCP host (LangBot, NoneBot / AstrBot LLM plugins, Claude / Cursor style clients, ...) can use the kit.
 // In chat bots the host sends the returned file path or URL itself; tool images only reach the model.
+import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
 import { createInterface } from 'node:readline'
 import { loadImageInput, type StickerKit } from './core/index.js'
+
+const VERSION: string = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
 
 const TOOLS = [
   {
@@ -76,7 +79,7 @@ export async function serveMcp(kit: StickerKit, opts: { images?: boolean } = {})
         send({ jsonrpc: '2.0', id, result: {
           protocolVersion: params?.protocolVersion ?? '2025-06-18',
           capabilities: { tools: {} },
-          serverInfo: { name: 'nekowhale-stickers', version: '1.0.0' },
+          serverInfo: { name: 'nekowhale-stickers', version: VERSION },
           instructions: `Stickers of 大肥鱼 / GPT娘: sticker_search, then sticker_get and send the returned file. In plain-text replies a bridge may expand [sticker:name]. At most one sticker per reply. ${kit.attribution.text}`,
         } })
       } else if (method === 'tools/list') send({ jsonrpc: '2.0', id, result: { tools: TOOLS } })

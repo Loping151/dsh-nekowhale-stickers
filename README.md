@@ -72,7 +72,8 @@ cordis 服务 <code>stickers</code>、<code>[sticker:名字]</code> 回复标记
 <tr>
 <td colspan="3" valign="top">
 <h4>🐋 网页桌宠</h4>
-dsh 网页界面右下角会出现 kiriyuki.com 的 大肥鱼网页桌宠。桌宠在独立的跨域 iframe 里运行，不接触 dsh 的会话；配置 <code>pet: false</code> 可关闭。
+dsh 网页界面右下角会出现 kiriyuki.com 的 大肥鱼网页桌宠。桌宠在独立的跨域 iframe 里运行，不接触 dsh 的会话；配置 <code>pet: false</code> 可关闭。<br>
+<b>双击桌宠查 DeepSeek 余额</b>：用的是 dsh 里已登录的 DeepSeek 账号或已设置的 API Key（两样都有时优先账号），只在双击时由本机 dsh 向 deepseek.com 查询，Key 和登录凭据不会发到别处，也只有本机页面能拿到结果；<code>petBalance: false</code> 可关闭。
 </td>
 </tr>
 </table>
@@ -135,6 +136,7 @@ dsh plugin --profile web add dsh-nekowhale-stickers
 | `returnImageToModel` | `false` | 把图片附给模型看（消耗图像 token） |
 | `pet` | `true` | 网页界面里显示大肥鱼桌宠；`false` 关闭 |
 | `petHeight` / `petBubbles` | `211` / `true` | 桌宠大小（高度，像素）、对话气泡（关掉可少加载约 1.5 MB） |
+| `petBalance` | `true` | 双击桌宠查 DeepSeek 余额；`false` 关闭 |
 
 ## 🧰 工具
 

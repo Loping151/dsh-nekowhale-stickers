@@ -16,10 +16,15 @@ Not part of this repository and not covered by any license here:
   - The README images (hero, showcase, template examples, portraits, icon), hosted by
     kiriyuki.com under https://kiriyuki.com/meme/kit/nekowhale/ .
   - icon.webp, a small copy of that icon shipped so dsh can show it on its Plugins page.
+  - client/ui/balance/, the balance card artwork of the kiriyuki.com desktop pet, shipped so the
+    card can be drawn without loading anything from another site.
   - The web pet (Live2D model and runtime), provided by kiriyuki.com.
 These remain the property of their authors. They may be shared non-commercially as long as the
 original author's link and website are kept; no paid or other commercial use.
 大肥鱼 design is based on ZipZipPipe (https://space.bilibili.com/4168597) and 上善无形
 (https://space.bilibili.com/4456176); GPT娘 design is based on ZipZipPipe.
+
+client/ui/font/zcool-kuaile-balance.woff2 is a subset of ZCOOL KuaiLe, licensed under the SIL Open
+Font License 1.1 (client/ui/font/OFL-ZCOOLKuaiLe.txt).
 
 Source code is licensed separately under Apache-2.0 (see LICENSE and NOTICE).
