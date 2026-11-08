@@ -36,6 +36,7 @@ export interface Config {
   banwords: boolean
   searchLimit: number
   returnImageToModel: boolean
+  stickerSize: number
   pet: boolean
   petHeight: number
   petBubbles: boolean
@@ -75,6 +76,9 @@ export const Config: Schema<Config> = Schema.object({
   // Templates
   templates: live(Schema.boolean().default(true).description('Enable meme_render (text / avatar templates, rendered locally).')),
   banwords: live(Schema.boolean().default(true).description('Mask banned words in rendered memes, like the website does.')),
+  // Web UI chat
+  stickerSize: live(Schema.natural().min(10).max(200).default(100)
+    .description('On-screen size of stickers and rendered memes in the web UI chat, in percent of the GIF\'s own size. Display only: the file is not resized.')),
   // Web pet
   pet: live(Schema.boolean().default(true).description('Show the kiriyuki.com web pet (大肥鱼) floating in the web UI. Turning it off hides it within seconds.')),
   petHeight: live(Schema.natural().min(120).max(480).default(211).description('Pet height in CSS pixels.')),
@@ -88,7 +92,7 @@ export const Config: Schema<Config> = Schema.object({
 // What the web UI settings page edits (dsh: Settings → Plugins). dsh stores the user's values in
 // $DSH_HOME/settings.yaml on top of the cordis.patch.yml config, and pushes changes live.
 const LIVE_KEYS = ['pet', 'petHeight', 'petBubbles', 'petBalance', 'persona', 'promptMode', 'frequency', 'indexLimit',
-  'searchLimit', 'returnImageToModel', 'agentCuration', 'templates', 'banwords', 'blacklist', 'whitelist'] as const
+  'searchLimit', 'returnImageToModel', 'stickerSize', 'agentCuration', 'templates', 'banwords', 'blacklist', 'whitelist'] as const
 type Live = Pick<Config, typeof LIVE_KEYS[number]>
 
 export const Settings = Schema.intersect([
@@ -105,6 +109,7 @@ export const Settings = Schema.intersect([
     indexLimit: Schema.natural().default(40).description('index 模式最多列出的表情数'),
   }).description('角色与提示'),
   Schema.object({
+    stickerSize: Schema.natural().min(10).max(200).default(100).description('聊天中表情的显示大小'),
     searchLimit: Schema.natural().min(1).max(20).default(5).description('每次搜索返回的条数'),
     returnImageToModel: Schema.boolean().default(false).description('把图片附给模型看（消耗图像 token）'),
     agentCuration: Schema.boolean().default(true).description('允许 agent 自己挑选、开关表情'),
@@ -423,12 +428,14 @@ export function apply(ctx: any, config: Config) {
   })
 
   // ---------------------------------------------------------------- image route for the web UI
-  // The pet runs in a cross-origin iframe served by the site; the page only gets this small config.
+  // The pet runs in a cross-origin iframe served by the site; the page only gets this small config, which also
+  // carries the chat sticker size (applied by the browser half, see client.js).
   const petConfig = () => {
     const c = cur()
     return {
       pet: c.pet, base: `${config.site.replace(/\/+$/u, '')}/hakimi-pet`, character: PET_CHARACTER,
       height: c.petHeight, bubbles: c.petBubbles, balance: c.petBalance, local: `${config.routePath}/pet`,
+      stickerSize: c.stickerSize, route: config.routePath,
     }
   }
 

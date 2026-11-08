@@ -134,6 +134,7 @@ dsh plugin --profile web add dsh-nekowhale-stickers
 | `agentCuration` | `true` | 允许 agent 用 `sticker_manage` 自选表情 |
 | `templates` / `banwords` | `true` | 模板开关；与网站一致的屏蔽词过滤 |
 | `returnImageToModel` | `false` | 把图片附给模型看（消耗图像 token） |
+| `stickerSize` | `100` | 聊天里表情的显示大小，原图的百分比（10–200）；只改网页上的显示，GIF 文件不变 |
 | `pet` | `true` | 网页界面里显示大肥鱼桌宠；`false` 关闭 |
 | `petHeight` / `petBubbles` | `211` / `true` | 桌宠大小（高度，像素）、对话气泡（关掉可少加载约 1.5 MB） |
 | `petBalance` | `true` | 双击桌宠查 DeepSeek 余额；`false` 关闭 |

@@ -134,6 +134,7 @@ Defaults can also go in the profile's `cordis.patch.yml`; values saved in the we
 | `agentCuration` | `true` | let the agent curate with `sticker_manage` |
 | `templates` / `banwords` | `true` | templates; the website's word filter |
 | `returnImageToModel` | `false` | attach the picture for the model to see (image tokens) |
+| `stickerSize` | `100` | on-screen size of stickers in the web UI chat, in percent of the GIF's own size (10–200); display only, the GIF file is unchanged |
 | `pet` | `true` | show the 大肥鱼 web pet in the web UI; `false` turns it off |
 | `petHeight` / `petBubbles` | `211` / `true` | pet size (height in pixels), speech bubbles (off saves about 1.5 MB) |
 | `petBalance` | `true` | double-click the pet to show your DeepSeek balance; `false` turns it off |

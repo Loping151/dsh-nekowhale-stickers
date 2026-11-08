@@ -204,6 +204,25 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
     }
   }
 
+  // ---------------------------------------------------------------- sticker size in the chat
+  // dsh draws the `![alt](url)` line from sticker_send / meme_render as a plain <img> at the GIF's own size (300 px
+  // for most stickers), and shows raw HTML as text, so the reply cannot carry a size. CSS zoom on the images this
+  // plugin's route serves resizes them on screen only: the file is untouched, dsh's max-width still fits them to
+  // the column, and the full-size preview (a dialog) is left alone. At 100% nothing is added.
+  function useStickerSize(cfg) {
+    const size = Math.max(10, Math.min(200, Number(cfg && cfg.stickerSize) || 100))
+    const route = String((cfg && cfg.route) || '/x-nekowhale-stickers')
+    React.useEffect(() => {
+      if (size === 100) return undefined
+      const at = (kind) => `img[src*=${JSON.stringify(`${route}/${kind}/`)}]`
+      const style = document.createElement('style')
+      style.setAttribute('data-nekowhale-sticker-size', '')
+      style.textContent = `:is(${at('s')},${at('r')}):not([role=dialog] img){zoom:${size / 100}}`
+      document.head.append(style)
+      return () => style.remove()
+    }, [size, route])
+  }
+
   function PetHost() {
     const [cfg, setCfg] = React.useState(() => globalThis.__NEKOWHALE_PET__ || null)
     React.useEffect(() => {
@@ -216,6 +235,7 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
       const timer = setInterval(pull, POLL_MS)
       return () => { alive = false; clearInterval(timer) }
     }, [])
+    useStickerSize(cfg)
     if (!cfg || !cfg.pet || !cfg.base) return null
     return h(PetFrame, { cfg, key: [cfg.base, cfg.character, cfg.height, cfg.bubbles].join('|') })
   }
@@ -458,7 +478,7 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
     pet: '在网页界面显示大肥鱼桌宠', petHeight: '桌宠大小（高度，像素）', petBubbles: '桌宠对话气泡', petBalance: '双击桌宠查 DeepSeek 余额',
     persona: '模型身份', promptMode: '常驻提示', frequency: '发表情的频率（提示模式为 hint / index 时生效）',
     indexLimit: 'index 模式最多列出的表情数', searchLimit: '每次搜索返回的条数',
-    returnImageToModel: '把图片附给模型看（消耗图像 token）', agentCuration: '允许 agent 自己挑选、开关表情',
+    returnImageToModel: '把图片附给模型看（消耗图像 token）', stickerSize: '聊天中表情的显示大小', agentCuration: '允许 agent 自己挑选、开关表情',
     templates: '启用模板制图（想 / 举牌 / 葱卷 / 对联 / 抱）', banwords: '模板文字自动屏蔽敏感词',
     blacklist: '黑名单：一行一条，名字、编号或 tag: / pack: / emotion: 前缀', whitelist: '白名单：非空时只使用匹配的表情',
   }
@@ -466,7 +486,7 @@ window.__ModuleLoader__.load({ id: 'dsh-nekowhale-stickers', factory: (require) 
   const GROUPS = [
     ['网页桌宠', ['pet', 'petHeight', 'petBubbles', 'petBalance']],
     ['角色与提示', ['persona', 'promptMode', 'frequency', 'indexLimit']],
-    ['表情', ['searchLimit', 'returnImageToModel', 'agentCuration', 'templates', 'banwords', 'blacklist', 'whitelist']],
+    ['表情', ['stickerSize', 'searchLimit', 'returnImageToModel', 'agentCuration', 'templates', 'banwords', 'blacklist', 'whitelist']],
   ]
   const ORDER = GROUPS.flatMap(([g, keys]) => keys.map((key) => [key, g]))
   function fieldsOf(node, out) {
